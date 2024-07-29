@@ -13,11 +13,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  geolocator: ^12.0.0
   weather: ^3.1.1
   flutter_bloc: ^8.1.6
   intl: ^0.18.1
   equatable: ^2.0.5
+  flutter_native_splash: ^2.4.1
 
 
 
@@ -37,3 +37,4 @@ flutter:
 
   assets:
     - assets/
+

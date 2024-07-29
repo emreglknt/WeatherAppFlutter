@@ -1,0 +1,14 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  color: "#ff7e00"
+  image: "assets/weatherlogo.png"
+  branding: "assets/brand.png"
+
+
+
+  android_12:
+   color: "#ff7e00"
+   image: "assets/forecastlogo.jpg"
+   branding: "assets/brand.png"

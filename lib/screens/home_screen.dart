@@ -23,6 +23,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final ScrollController _scrollController = ScrollController();
 
+
+  @override
+  void initState(){
+    super.initState();
+    BlocProvider.of<WeatherBloc>(context).add(FetchWeather('Ankara'));
+  }
+
+
+
+
+
+
   void _scrollToBottom() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
@@ -106,49 +118,56 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 20),
                         Center(
                           child: getWeatherIcon(
                               state.forecasts[0].weatherConditionCode!),
                         ),
                         Center(
-                          child: Text(
-                            '📍${state.forecasts[0].areaName}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                                fontWeight: FontWeight.w400),
+                          child: Card(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '📍${state.forecasts[0].areaName}',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    '${state.forecasts[0].temperature?.celsius?.toStringAsFixed(1)} °C',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 50,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                  Text(
+                                    '${state.forecasts[0].weatherDescription}',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 27,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${state.forecasts[0].date?.day}-${state.forecasts[0].date?.month}-${state.forecasts[0].date?.year}',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                        Center(
-                          child: Text(
-                            '${state.forecasts[0].temperature?.celsius?.toStringAsFixed(1)} °C',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 50,
-                                fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        Center(
-                          child: Text(
-                            '${state.forecasts[0].weatherDescription}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 27,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Center(
-                          child: Text(
-                            '${state.forecasts[0].date?.day}'+'-'+'${state.forecasts[0].date?.month}'+'-'+'${state.forecasts[0].date?.year}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 8),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 22.0),
                           child: Row(
@@ -214,11 +233,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5.0),
+                          padding: EdgeInsets.symmetric(vertical: 2.0),
                           child: Divider(color: Colors.grey),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -257,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       state.forecasts[index].weatherConditionCode!),
                                   title: Text(
                                     '${state.forecasts[index].date?.day}'+'-'+'${state.forecasts[index].date?.month}'+'-'+'${state.forecasts[index].date?.year}'
-                                    +'   '+'${state.forecasts[index].date?.hour}'+' : '+'00',
+                                    +'   '+'${state.forecasts[index].date?.hour}'+':'+'00',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w400
