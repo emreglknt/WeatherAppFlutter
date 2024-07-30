@@ -17,11 +17,19 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
     on<FetchWeather>((event, emit) async{
       emit(WeatherLoading());
       try {
+
+        bool isConnected = await checkInternetConnection();
+        if(!isConnected){
+          emit(WeatherError(message: 'No Internet Connection'));
+          return;
+        }
+
+
         WeatherFactory wf = WeatherFactory(API_KEY,language: Language.ENGLISH);
         List<Weather> forecasts = (await wf.fiveDayForecastByCityName(event.cityName));
         emit(WeatherForecastSuccess(forecasts));
-      }catch(error){
-        emit(WeatherError());
+      }catch (error) {
+        emit(WeatherError(message: 'An error occurred'));
       }
     });
 

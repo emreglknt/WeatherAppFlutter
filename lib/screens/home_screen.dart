@@ -322,7 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               } else if (state is WeatherLoading) {
                 return Center(child: CircularProgressIndicator());
-              } else {
+              }else if(state is WeatherError){
+                return Center(child: Text(state.message));
+              }
+              else {
                 return const Center(
                   child: Text(
                     'Error!\nPlease enter a valid city to get the weather forecast.',

@@ -27,5 +27,9 @@ final class WeatherForecastSuccess extends WeatherState {
 
 
 
-
-final class WeatherError extends WeatherState {}
+final class WeatherError extends WeatherState {
+    final String message;
+    const WeatherError({required this.message});
+    @override
+    List<Object> get props => [message];
+}
