@@ -9,6 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather_app_flutter/bloc/weather_bloc.dart';
 
+import '../utils.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,18 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController cityController = TextEditingController();
 
+  String selectedCity = 'Ankara';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    BlocProvider.of<WeatherBloc>(context).add(FetchWeather('Ankara'));
+    BlocProvider.of<WeatherBloc>(context).add(const FetchWeather("Ankara"));
   }
-
-
-
-
-
 
   void _scrollToBottom() {
     _scrollController.animateTo(
@@ -50,12 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-
-
   @override
   Widget build(BuildContext context) {
-    final TextEditingController cityController = TextEditingController();
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -63,30 +58,51 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         systemOverlayStyle: const SystemUiOverlayStyle(),
         title: Padding(
-          padding: const EdgeInsets.only(top: 20.0,bottom: 15),
-          child: TextField(
-            controller: cityController,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white.withOpacity(0.34),
-              hintText: 'Enter city name',
-              contentPadding:
-              const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
+          padding: const EdgeInsets.only(top: 20.0, bottom: 15),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: cityController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.34),
+                    hintText: 'Enter city name',
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () {
+                        final cityName = cityController.text;
+                        if (cityName.isNotEmpty) {
+                          BlocProvider.of<WeatherBloc>(context).add(FetchWeather(cityName));
+                        }
+                      },
+                    ),
+                  ),
+                ),
               ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  final cityName = cityController.text;
-                  if (cityName.isNotEmpty) {
-                    BlocProvider.of<WeatherBloc>(context)
-                        .add(FetchWeather(cityName));
-                  }
+              const SizedBox(width: 15),
+              DropdownButton<String>(
+                value: selectedCity,
+                dropdownColor: Colors.transparent.withOpacity(0.4),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedCity = newValue!;
+                    BlocProvider.of<WeatherBloc>(context).add(FetchWeather(selectedCity));
+                  });
                 },
+                items: cities.map<DropdownMenuItem<String>>((String city) {
+                  return DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(city, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -107,9 +123,12 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.black.withOpacity(0.3),
             ),
           ),
+
+
+
           BlocBuilder<WeatherBloc, WeatherState>(
             builder: (context, state) {
-              if (state is WeatherSuccess) {
+              if (state is WeatherForecastSuccess) {
                 return SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
@@ -134,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Column(
                                 children: [
                                   Text(
-                                    '📍${state.forecasts[0].areaName}',
+                                    '🌍${state.forecasts[0].areaName}',
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 25,
@@ -148,15 +167,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontWeight: FontWeight.w700),
                                   ),
                                   Text(
-                                    '${state.forecasts[0].weatherDescription}',
+                                    '${state.forecasts[0].weatherDescription?.toUpperCase()}',
                                     style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 27,
-                                        fontWeight: FontWeight.w500),
+                                      color: Colors.white,
+                                      fontSize: 27,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
+
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${state.forecasts[0].date?.day}-${state.forecasts[0].date?.month}-${state.forecasts[0].date?.year}',
+                                    '${state.forecasts[0].date?.day}.${state.forecasts[0].date?.month}.${state.forecasts[0].date?.year}',
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,
@@ -178,21 +199,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(
                                     width: 50,
                                     height: 50,
-                                    child: Image.asset('assets/13.png'),
+                                    child: Image.asset('assets/speed.png'),
                                   ),
                                   const SizedBox(width: 5),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        'Temp Max',
+                                        'Wind',
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w300),
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
-                                        '${state.forecasts[0].tempMax?.celsius?.toStringAsFixed(1)} °C',
+                                        '${state.forecasts[0].windSpeed} km/h',
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w300),
@@ -206,21 +227,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(
                                     width: 50,
                                     height: 50,
-                                    child: Image.asset('assets/14.png'),
+                                    child: Image.asset('assets/humidity.png'),
                                   ),
                                   const SizedBox(width: 5),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        'Temp Min',
+                                        'Humidity',
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w300),
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
-                                        '${state.forecasts[0].tempMin?.celsius?.toStringAsFixed(1)} °C',
+                                        '${state.forecasts[0].humidity}%',
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w300),

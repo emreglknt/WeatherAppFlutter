@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather_app_flutter/bloc/weather_bloc.dart';
 import 'package:weather_app_flutter/screens/home_screen.dart';
+import 'package:weather_app_flutter/screens/splashScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.blue,
           ),
           debugShowCheckedModeBanner: false,
-          home: const HomeScreen()
+          home: const Splashscreen()
       ),
     );
   }

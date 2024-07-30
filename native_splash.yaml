@@ -3,12 +3,14 @@ flutter_native_splash:
   ios: true
   web: false
   color: "#ff7e00"
-  image: "assets/weatherlogo.png"
-  branding: "assets/brand.png"
+  image: "assets/weatherr.jpg"
+  background_image: "assets/weatherr.jpg"
+  branding: "assets/branddfore.png"
 
 
 
   android_12:
    color: "#ff7e00"
-   image: "assets/forecastlogo.jpg"
-   branding: "assets/brand.png"
+   image: "assets/weatherr.jpg"
+   branding: "assets/branddfore.png"
+   background_image: "assets/weatherr.jpg"
