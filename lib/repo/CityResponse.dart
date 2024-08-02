@@ -27,7 +27,7 @@ class CityRepository {
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
           textColor: Colors.white,
-          fontSize: 16.0
+          fontSize:  16.0
       );
     }
   }

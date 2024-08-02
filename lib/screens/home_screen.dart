@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController cityController = TextEditingController();
   final CityRepository cityRepository = CityRepository();
 
-  String selectedCity = 'Ankara';
+  String? selectedCity ;
   List<String> favoriteCities = [];
 
   @override
@@ -38,6 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> favorites = await cityRepository.getFavoriteCities();
     setState(() {
       favoriteCities = favorites;
+      if (!favoriteCities.contains(selectedCity)) {
+        selectedCity = null;
+      }
     });
   }
 
@@ -53,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _scrollToBottom() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 30000),
       curve: Curves.easeInOut,
     );
   }
@@ -61,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    cityController.dispose();
     super.dispose();
   }
 
@@ -77,7 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(top: 20.0, bottom: 15),
           child: Row(
             children: [
+              // Search bar with fixed width
               Expanded(
+                flex: 4, // Adjust flex value to control width ratio
                 child: TextField(
                   controller: cityController,
                   decoration: InputDecoration(
@@ -85,9 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     fillColor: Colors.white.withOpacity(0.34),
                     hintText: 'Enter city name',
                     contentPadding:
-                        const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(26),
                       borderSide: BorderSide.none,
                     ),
                     suffixIcon: IconButton(
@@ -104,23 +110,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 15),
-              DropdownButton<String>(
-                value: selectedCity,
-                dropdownColor: Colors.transparent.withOpacity(0.4),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedCity = newValue!;
-                    BlocProvider.of<WeatherBloc>(context)
-                        .add(FetchWeather(selectedCity));
-                  });
-                },
-                items:
-                favoriteCities.map<DropdownMenuItem<String>>((String city) {
-                  return DropdownMenuItem<String>(
-                    value: city,
-                    child: Text(city, style: TextStyle(color: Colors.white)),
-                  );
-                }).toList(),
+              // Dropdown with fixed width
+              Expanded(
+                flex: 2, // Adjust flex value to control width ratio
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true, // Ensures dropdown takes up available space
+                    value: selectedCity,
+                    dropdownColor: Colors.transparent.withOpacity(0.12),
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                    iconSize: 24,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedCity = newValue!;
+                        BlocProvider.of<WeatherBloc>(context).add(FetchWeather(selectedCity!));
+                      });
+                    },
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    items: favoriteCities.map<DropdownMenuItem<String>>((String city) {
+                      return DropdownMenuItem<String>(
+                        value: city,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: selectedCity == city ? Colors.blue : Colors.white,
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: Text(
+                            city,
+                            style: TextStyle(
+                              color: selectedCity == city ? Colors.white : Colors.purple,
+                              fontWeight: selectedCity == city ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 14
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
             ],
           ),
@@ -146,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BlocBuilder<WeatherBloc, WeatherState>(
             builder: (context, state) {
               if (state is WeatherForecastSuccess) {
+                cityController.clear();
                 return SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
@@ -154,85 +183,121 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15),
                         Center(
                           child: getWeatherIcon(
                               state.forecasts[0].weatherConditionCode!),
                         ),
                         Center(
                           child: Card(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withOpacity(0.25),
+                            elevation: 10,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(25),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Stack(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
                                 children: [
-                                  Column(
+                                  Row(
                                     children: [
-                                      Text(
-                                        '🌍${state.forecasts[0].areaName}',
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.w400),
-                                      ),
-                                      Text(
-                                        '${state.forecasts[0].temperature?.celsius?.toStringAsFixed(1)} °C',
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 50,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                                      Text(
-                                        '${state.forecasts[0].weatherDescription?.toUpperCase()}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 27,
-                                          fontWeight: FontWeight.w500,
+                                      // Area Name on the left
+                                      Expanded(
+                                        child: Text(
+                                          '🌍 ${state.forecasts[0].areaName} | ${state.forecasts[0].country} ',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.w400),
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${state.forecasts[0].date?.day}.${state.forecasts[0].date?.month}.${state.forecasts[0].date?.year}',
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w400),
+                                      // Favorite icon on the right
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            favoriteCities.contains(state.forecasts[0].areaName)
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color: favoriteCities.contains(state.forecasts[0].areaName)
+                                                ? Colors.red
+                                                : Colors.white,
+                                            size: 35,
+                                          ),
+                                          onPressed: () async {
+                                            _toggleFavoriteCity(state.forecasts[0].areaName!);
+                                          },
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  Positioned(
-                                    bottom: -10,
-                                    right: -10,
-                                    child: IconButton(
-                                      icon: Icon(
-                                        favoriteCities.contains(
-                                                state.forecasts[0].areaName)
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: favoriteCities.contains(
-                                                state.forecasts[0].areaName)
-                                            ? Colors.red
-                                            : Colors.white,
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Temperature in the center
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '${state.forecasts[0].temperature?.celsius?.toStringAsFixed(1)} °C',
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 37,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                            Text(
+                                              '${state.forecasts[0].weatherDescription?.toUpperCase()}',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 23,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      onPressed: () async {
-                                        if (favoriteCities.contains(state.forecasts[0].areaName)) {
-                                          await cityRepository.removeCityFromFavorites(state.forecasts[0].areaName!);
-                                        } else {
-                                          await cityRepository.addCityToFavorites(state.forecasts[0].areaName!);
-                                        }
-                                        _loadFavoriteCities(); // Reload favorite cities
-                                      },
-                                    ),
+                                      // Date on the right
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              '${state.forecasts[0].date?.day}.${state.forecasts[0].date?.month}.${state.forecasts[0].date?.year}',
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w300),
+                                            ),
+                                            const SizedBox(height: 15),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                Icon(Icons.thermostat, color: Colors.white, size: 40),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  'Temp Max\n${state.forecasts[0].tempMax?.celsius?.toStringAsFixed(1)} °C',
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 17,
+                                                      fontWeight: FontWeight.w300),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+
+
+                        const SizedBox(height: 17),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 22.0),
                           child: Row(
